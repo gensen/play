@@ -11,4 +11,12 @@ Sass::Plugin.options[:template_location] = 'public/scss'
 Sass::Plugin.options[:stylesheet_location] = 'public/stylesheets'
 use Sass::Plugin::Rack
 
+require 'rack/cors'
+use Rack::Cors do
+  allow do
+    origins "*"
+    resource '/api/*', :headers => :any, :methods => :get
+  end
+end
+
 run Play::App
