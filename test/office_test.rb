@@ -1,26 +1,21 @@
-require 'helper'
+require File.expand_path("../helper", __FILE__)
 
 context "Office" do
   setup do
   end
 
-  test "url returns config office_url" do
-    Play.expects(:config).returns({'office_url' => 'http://zachholman.com'})
-    assert_equal 'http://zachholman.com', Play::Office.url
-  end
-
   test "user string returns a string o' user data" do
     object = "lol"
     object.stubs(:read).returns("holman,kneath")
-    Play::Office.stubs(:connection).returns(object)
-    assert_equal "holman,kneath", Play::Office.user_string
+    Office.stubs(:connection).returns(object)
+    assert_equal "holman,kneath", Office.user_string
   end
 
   test "users are returned based on office string" do
-    holman = Play::User.create(:office_string => 'holman')
-    kneath = Play::User.create(:office_string => 'kneath')
-    
-    Play::Office.stubs(:user_string).returns("holman,defunkt")
-    assert_equal [holman], Play::Office.users
+    holman = User.create 'holman', 'zach@example.com'
+    kneath = User.create 'kneath', 'kyle@example.com'
+
+    Office.stubs(:user_string).returns("holman,defunkt")
+    assert_equal ['holman'], Office.users.map{|user| user.login}
   end
 end

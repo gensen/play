@@ -1,13 +1,15 @@
 require 'rubygems'
 require 'rake'
+require 'yaml'
 
-#############################################################################
-#
-# Standard tasks
-#
-#############################################################################
+$LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__) + '/app')
 
-task :default => :test
+require 'boot'
+
+task :default do
+  ENV['RACK_ENV'] = 'test'
+  Rake::Task['test'].invoke
+end
 
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
@@ -16,22 +18,30 @@ Rake::TestTask.new(:test) do |test|
   test.verbose = true
 end
 
-#############################################################################
-#
-# Custom tasks (add your own tasks here)
-#
-#############################################################################
-
-$LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__) + '/lib')
-
-require 'yaml'
-
 task :environment do
   require 'lib/play'
   require "bundler/setup"
 end
 
+desc "Run tests as CI sees them"
+task :ci do
+  ENV['CI'] = '1'
+  Rake::Task['test'].invoke
+end
+
 desc "Open an irb session preloaded with this library"
 task :console do
-  sh "irb -rubygems -r ./lib/play"
+  sh "irb -rubygems -r ./app/boot"
+end
+
+desc "Start the server"
+task :start do
+  Kernel.exec "bundle exec foreman start"
+end
+
+namespace :redis do
+  desc "Wipe all data in redis"
+  task :reset do
+    $redis.flushdb
+  end
 end

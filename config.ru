@@ -1,15 +1,14 @@
-require File.expand_path(File.dirname(__FILE__) + '/lib/play')
+require File.expand_path(File.dirname(__FILE__) + '/app/boot')
+require 'sprockets'
 
-require 'omniauth/oauth'
-oauth = Play.config
+stylesheets = Sprockets::Environment.new
+stylesheets.append_path 'app/frontend/styles'
 
-use Rack::Session::Cookie
-use OmniAuth::Strategies::GitHub, oauth['gh_key'], oauth['gh_secret']
+javascripts = Sprockets::Environment.new
+javascripts.append_path 'app/frontend/scripts'
 
-require 'sass/plugin/rack'
-Sass::Plugin.options[:template_location] = 'public/scss'
-Sass::Plugin.options[:stylesheet_location] = 'public/stylesheets'
-use Sass::Plugin::Rack
+map("/css")      { run stylesheets }
+map("/js")       { run javascripts }
 
 require 'rack/cors'
 use Rack::Cors do
@@ -19,4 +18,4 @@ use Rack::Cors do
   end
 end
 
-run Play::App
+map('/')         { run Play::App }
